@@ -1,6 +1,7 @@
 import tensorflow as tf
-import tensorflow_probability as tfp
+# import tensorflow_probability as tfp
 import numpy as np
+tf.enable_eager_execution()
 
 class Create_recurrent_unit(tf.keras.layers.Layer):
     def __init__(self, params):
@@ -84,13 +85,11 @@ class TARGET_LSTM(tf.keras.layers.Layer):
         self.temperature = 1.0
         self.params = params
 
-        tf.random.set_seed(66)
+        tf.random.set_random_seed(66)
 
         self.g_embeddings = tf.Variable(self.params[0])
         self.g_recurrent_unit = Create_recurrent_unit(self.params)  # maps h_{t-1} to h_t for generator, one step of LSTM
         self.g_output_unit = Create_output_unit(self.params)        # maps h_t to o_t (output token logits), logits
-
-        self.generate()
 
     def generate(self):
         self.h0 = tf.zeros([self.batch_size, self.hidden_dim])
@@ -107,9 +106,13 @@ class TARGET_LSTM(tf.keras.layers.Layer):
             h_t = self.g_recurrent_unit(x_t,h_tm1)  # lstm(x_t, h_{t-1}) ->h_t. [batch. hidden_size * 2], hidden_memory_tuple
             o_t = self.g_output_unit(h_t)  # [batch, vocab_size] , logits not prob
             log_prob = tf.math.log(tf.nn.softmax(o_t))  # log-prob  # [batch, vocab_size]
+
             # Monte Carlo search? 多项分布 Multinomial
-            self.token_search = tfp.distributions.Multinomial(total_count=1, logits=log_prob)
-            next_token = tf.cast(tf.argmax(self.token_search.probs, axis=-1), tf.int32)  # [batch]
+            # self.token_search = tfp.distributions.Multinomial(total_count=1, logits=log_prob)
+            # next_token = tf.cast(tf.argmax(self.token_search.probs, axis=-1), tf.int32)  # [batch]
+            next_token = tf.cast(tf.reshape(tf.multinomial(logits=log_prob, num_samples=1),
+                                            [self.batch_size]), tf.int32)
+
             x_tp1 = tf.nn.embedding_lookup(self.g_embeddings,next_token)  # x_{t+1}, [batch, emb_dim] 作为下一个 time_step 的输入
             gen_o = gen_o.write(index=i,
                                 value=tf.reduce_sum(tf.multiply(tf.one_hot(next_token, self.vocab_size, 1.0, 0.0),
@@ -129,6 +132,7 @@ class TARGET_LSTM(tf.keras.layers.Layer):
 
         self.gen_x = self.gen_x.stack()  # [seq_length, batch_size]
         self.gen_x = tf.transpose(self.gen_x, perm=[1, 0])  # [batch_size, seq_length]
+        return self.gen_x
 
     def pretrain(self, input_x):
         # supervised pretraining for generator
@@ -171,7 +175,7 @@ class TARGET_LSTM(tf.keras.layers.Layer):
             tf.reshape(
                 -tf.reduce_sum(self.real_target * tf.math.log(tf.reshape(self.g_predictions, [-1, self.vocab_size])), 1),
                 shape=[-1, self.sequence_length]), 1)  # batch_size
-
+        return self.pretrain_loss
     # def generate(self, session):
     #     # h0 = np.random.nimport tensorflow_probability as tfpormal(size=self.hidden_dim)
     #     outputs = session.run(self.gen_x)
