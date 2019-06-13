@@ -1,7 +1,7 @@
 import tensorflow as tf
 # import tensorflow_probability as tfp
 import numpy as np
-tf.enable_eager_execution()
+# tf.enable_eager_execution()
 
 class Create_recurrent_unit(tf.keras.layers.Layer):
     def __init__(self, params):
@@ -127,8 +127,7 @@ class TARGET_LSTM(tf.keras.layers.Layer):
                        tf.nn.embedding_lookup(self.g_embeddings, self.start_token),
                        self.h0, gen_o, gen_x)  # # 分别对应 time_step, x_t, h_{t-1}, gen_o, gen_x
         )
-        print(n)
-        assert n.numpy() == np.array(self.sequence_length)
+        # assert n.numpy() == np.array(self.sequence_length)
 
         self.gen_x = self.gen_x.stack()  # [seq_length, batch_size]
         self.gen_x = tf.transpose(self.gen_x, perm=[1, 0])  # [batch_size, seq_length]
@@ -140,7 +139,6 @@ class TARGET_LSTM(tf.keras.layers.Layer):
         with tf.device("/cpu:0"):
             self.processed_x = tf.transpose(tf.nn.embedding_lookup(self.g_embeddings, input_x),
                                             perm=[1, 0, 2])  # seq_length x batch_size x emb_dim
-
         g_predictions = tf.TensorArray(
             dtype=tf.float32, size=self.sequence_length,
             dynamic_size=False, infer_shape=True)
@@ -176,16 +174,10 @@ class TARGET_LSTM(tf.keras.layers.Layer):
                 -tf.reduce_sum(self.real_target * tf.math.log(tf.reshape(self.g_predictions, [-1, self.vocab_size])), 1),
                 shape=[-1, self.sequence_length]), 1)  # batch_size
         return self.pretrain_loss
-    # def generate(self, session):
-    #     # h0 = np.random.nimport tensorflow_probability as tfpormal(size=self.hidden_dim)
-    #     outputs = session.run(self.gen_x)
-    #     return outputs
-
-    # def init_matrix(self, shape):
-    #     return tf.random_normal(shape, stddev=1.0)
 
 if __name__ == "__main__":
     import pickle
+    # tf.enable_eager_execution()
     tmp_params = pickle.load(open("./save/target_params_py3.pkl", "rb"))
     tmp_target_lstm = TARGET_LSTM(vocab_size=5000,
                               batch_size=5,
@@ -194,6 +186,7 @@ if __name__ == "__main__":
                               sequence_length=5,
                               start_token=0,
                               params=tmp_params)
-    tmp_x = tf.constant([[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5]], dtype=tf.int32)
+    # tmp_x = tf.constant([[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5]], dtype=tf.int32)
     # tmp_target_lstm(tmp_x)
-    tmp_target_lstm.generate()
+    tmp_example = tmp_target_lstm.generate()
+    print(tmp_example)

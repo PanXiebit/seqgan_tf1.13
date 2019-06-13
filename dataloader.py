@@ -9,6 +9,7 @@ class Gen_Data_loader(object):
         self.token_stream = []
         with open(data_file, "r") as f:
             for line in f:
+                print(line)
                 line = line.strip()
                 line = line.split()
                 parse_line = [int(x) for x in line]
@@ -79,3 +80,9 @@ class Dis_dataloader(object):
 
     def reset_pointer(self):
         self.pointer = 0
+
+
+if __name__ == "__main__":
+    gen_load_data = Gen_Data_loader(batch_size=5)
+    gen_load_data.create_batches("./save/real_data.txt")
+    batch = gen_load_data.next_batch()

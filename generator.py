@@ -1,5 +1,4 @@
 import tensorflow as tf
-from tensorflow.python.ops import tensor_array_ops, control_flow_ops
 
 class Generator(tf.keras.layers.Layer):
     def __init__(self, vocab_size, batch_size, emb_dim, hidden_dim,
@@ -17,8 +16,11 @@ class Generator(tf.keras.layers.Layer):
         self.g_params = []
         self.grad_clip = 5.0
 
-        self.expected_reward = tf.Variable(tf.zeros([self.sequence_length]), dtype=tf.float32)
+        # initilizate state
+        self.h0 = tf.zeros([self.batch_size, self.hidden_dim])
+        self.h0 = tf.stack([self.h0, self.h0])
 
+        self.expected_reward = tf.Variable(tf.zeros([self.sequence_length]), dtype=tf.float32)
         self.g_embeddings = tf.Variable(self.init_matrix([self.vocab_size, self.emb_dim]))
         self.g_params.append(self.g_embeddings)
         self.g_recurrent_unit = self.create_recurrent_unit(self.g_params)  # maps h_{t-1} to h_t for generator
@@ -26,15 +28,10 @@ class Generator(tf.keras.layers.Layer):
 
     def generate(self):
         """
-
         :param input_x:  [batch, seq_len]
         :param rewards:  [batch, seq_len]
         :return:
         """
-        # initilizate state
-        self.h0 = tf.zeros([self.batch_size, self.hidden_dim])
-        self.h0 = tf.stack([self.h0, self.h0])
-
         gen_o = tf.TensorArray(dtype=tf.float32, size=self.sequence_length,
                                dynamic_size=False, infer_shape=True)
         gen_x = tf.TensorArray(dtype=tf.int32, size=self.sequence_length,
@@ -52,7 +49,7 @@ class Generator(tf.keras.layers.Layer):
             gen_x = gen_x.write(i, next_token)  # indices, batch_size
             return i + 1, x_tp1, h_t, gen_o, gen_x
 
-        _, _, _, self.gen_o, self.gen_x = control_flow_ops.while_loop(
+        _, _, _, self.gen_o, self.gen_x = tf.while_loop(
             cond=lambda i, _1, _2, _3, _4: i < self.sequence_length,
             body=_g_recurrence,
             loop_vars=(tf.constant(0, dtype=tf.int32),
@@ -63,7 +60,7 @@ class Generator(tf.keras.layers.Layer):
         self.gen_x = tf.transpose(self.gen_x, perm=[1, 0])  # [batch_size, seq_length]
         return self.gen_x
 
-    def pretrain_step(self, input_x):
+    def pretrain(self, input_x):
         with tf.device("/cpu:0"):
             self.processed_x = tf.transpose(tf.nn.embedding_lookup(self.g_embeddings, input_x),
                                             perm=[1, 0, 2])  # [seq_len, batch_size, emb_dim]
@@ -83,7 +80,7 @@ class Generator(tf.keras.layers.Layer):
             x_tp1 = ta_emb_x.read(i)
             return i + 1, x_tp1, h_t, g_predictions
 
-        _, _, _, self.g_predictions = control_flow_ops.while_loop(
+        _, _, _, self.g_predictions = tf.while_loop(
             cond=lambda i, _1, _2, _3: i < self.sequence_length,
             body=_pretrain_recurrence,
             loop_vars=(tf.constant(0, dtype=tf.int32),
@@ -92,20 +89,38 @@ class Generator(tf.keras.layers.Layer):
 
         self.g_predictions = tf.transpose(self.g_predictions.stack(),
                                           perm=[1, 0, 2])  # batch_size x seq_length x vocab_size
+        return self.g_predictions
 
+    def pretrain_step(self, input_x):
         # pretraining loss
-        self.pretrain_loss = -tf.reduce_sum(
+        g_predictions = self.pretrain(input_x)
+        pretrain_loss = -tf.reduce_sum(
             tf.one_hot(tf.to_int32(tf.reshape(input_x, [-1])), self.vocab_size, 1.0, 0.0) * tf.log(
-                tf.clip_by_value(tf.reshape(self.g_predictions, [-1, self.vocab_size]), 1e-20, 1.0)
+                tf.clip_by_value(tf.reshape(g_predictions, [-1, self.vocab_size]), 1e-20, 1.0)
             )
         ) / (self.sequence_length * self.batch_size)
+        pretrain_optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+        with tf.GradientTape() as tape:
+            self.pretrain_grad, _ = tf.clip_by_global_norm(
+                tape.gradient(pretrain_loss, self.g_params), self.grad_clip)
+            pretrain_optimizer.apply_gradients(zip(self.pretrain_grad, self.g_params))
+        return pretrain_loss
 
-        # training updates
-        pretrain_opt = self.g_optimizer(self.learning_rate)
-
-        self.pretrain_grad, _ = tf.clip_by_global_norm(tf.gradients(self.pretrain_loss, self.g_params), self.grad_clip)
-        self.pretrain_updates = pretrain_opt.apply_gradients(zip(self.pretrain_grad, self.g_params))
-        return self.pretrain_updates, self.pretrain_loss
+    def update_by_reward(self, input_x, rewards):
+        # Unsupervised training
+        g_predictions = self.pretrain(input_x)
+        g_loss = -tf.reduce_sum(
+            tf.reduce_sum(
+                tf.one_hot(tf.to_int32(tf.reshape(input_x, [-1])), self.vocab_size, 1.0, 0.0) * tf.log(
+                    tf.clip_by_value(tf.reshape(g_predictions, [-1, self.vocab_size]), 1e-20, 1.0)
+                ), 1) * tf.reshape(rewards, [-1])
+        )
+        g_optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+        with tf.GradientTape() as tape:
+            self.pretrain_grad, _ = tf.clip_by_global_norm(
+                tape.gradient(g_loss, self.g_params), self.grad_clip)
+            g_optimizer.apply_gradients(zip(self.pretrain_grad, self.g_params))
+        return g_loss
 
     def init_matrix(self, shape):
         return tf.random.normal(shape, stddev=0.1)
@@ -188,12 +203,13 @@ class Generator(tf.keras.layers.Layer):
 
         return unit
 
-    def g_optimizer(self, *args, **kwargs):
-        return tf.keras.optimizers.Adam(*args, **kwargs)
 
 if __name__ == "__main__":
     tf.enable_eager_execution()
-    generator = Generator(vocab_size=1000, batch_size=5, emb_dim=64, hidden_dim=64,
+    tmp_generator = Generator(vocab_size=1000, batch_size=5, emb_dim=64, hidden_dim=64,
                           sequence_length=20, start_token=0,
                           learning_rate=0.01, reward_gamma=0.95)
-    print(generator.generate())
+    tmp_example = tmp_generator.generate()  # [5, 20]
+    print(tmp_example)
+    # pretrain generator using tmp_example
+    tmp_generator.pretrain_step(tmp_example)
