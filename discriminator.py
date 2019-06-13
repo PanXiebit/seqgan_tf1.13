@@ -73,9 +73,9 @@ class Discriminator(tf.keras.layers.Layer):
         # Keeping track of l2 regularization loss (optional)
         self.l2_loss = tf.constant(0.0)
         self.l2_reg_lambda = l2_reg_lambda
-        self.optimizer = tf.train.AdamOptimizer(self.learning_rate)
+        self.d_optimizer = tf.train.AdamOptimizer(self.learning_rate)
 
-    def get_logits(self, input_x):
+    def _get_logits(self, input_x):
         embed_chars = tf.nn.embedding_lookup(self.embedding, input_x)  # [batch, x_seq_len, embed_size]
         embed_chars_expanded = tf.expand_dims(embed_chars, axis=-1)    # [batch, x_seq_len, embed_size, 1]
 
@@ -100,12 +100,11 @@ class Discriminator(tf.keras.layers.Layer):
         # Final (unnormalized) scores and predictions
         self.scores = self.pred_linear(self.h_drop)                 # [batch, num_calsses]
         self.ypred_for_auc = tf.nn.softmax(self.scores)
-
         self.predictions = tf.cast(tf.argmax(self.scores, axis=1), tf.int32)  # [batch,]
-        return self.ypred_for_auc, self.predictions
+        return self.ypred_for_auc
 
-    def comput_loss(self, input_x, input_y):
-        ypred_for_auc, _ = self.get_logits(input_x)
+    def call(self, input_x, input_y):
+        ypred_for_auc = self._get_logits(input_x)           # [batch, num_classes]
         losses = tf.reduce_mean(self.loss_obj(y_pred=ypred_for_auc, y_true=input_y))  # [batch] -> 1
         tf.identity(losses, name="cross_entropy")
         for weights in self.pred_linear.trainable_weights:
@@ -114,13 +113,13 @@ class Discriminator(tf.keras.layers.Layer):
         tf.identity(self.loss, name="total_loss")
         return self.loss
 
-    def train_op(self, input_x, input_y):
-        with tf.GradientTape() as tape:
-            d_loss = self.comput_loss(input_x, input_y)
-            self.pretrain_grad, _ = tf.clip_by_global_norm(
-                tape.gradient(d_loss, d_loss.trainable_variables), self.grad_clip)
-            self.optimizer.apply_gradients(zip(self.pretrain_grad, self.d_params))
-        return d_loss
+    # def train_op(self, input_x, input_y):
+    #     with tf.GradientTape() as tape:
+    #         d_loss = self.comput_loss(input_x, input_y)
+    #         self.pretrain_grad, _ = tf.clip_by_global_norm(
+    #             tape.gradient(d_loss, d_loss.trainable_variables), self.grad_clip)
+    #         self.optimizer.apply_gradients(zip(self.pretrain_grad, self.d_params))
+    #     return d_loss
 
 if __name__ == "__main__":
     # test discriminator
@@ -129,11 +128,11 @@ if __name__ == "__main__":
                                       num_filters=[128, 128, 128], num_classes=2)
     tmp_input_x = tf.constant(value=[[1,2,3,4,5],[2,4,6,8,0]], dtype=tf.int32)
     tmp_input_y = tf.constant(value=[[0,1], [0,1]], dtype=tf.int32)
-    ypred_for_auc, _ = tmp_discriminator.get_logits(tmp_input_x)
+    ypred_for_auc, _ = tmp_discriminator._get_logits(tmp_input_x)
     print(ypred_for_auc.shape, ypred_for_auc)
-    tmp_loss = tmp_discriminator.comput_loss(tmp_input_x, tmp_input_y)
+    tmp_loss = tmp_discriminator(tmp_input_x, tmp_input_y)
     print(tmp_loss)
-    tmp_discriminator.train_op(tmp_input_x, tmp_input_y)
+    # tmp_discriminator.train_op(tmp_input_x, tmp_input_y)
 
 
 

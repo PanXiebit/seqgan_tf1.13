@@ -9,7 +9,6 @@ class Gen_Data_loader(object):
         self.token_stream = []
         with open(data_file, "r") as f:
             for line in f:
-                print(line)
                 line = line.strip()
                 line = line.split()
                 parse_line = [int(x) for x in line]

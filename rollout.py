@@ -4,11 +4,16 @@ import numpy as np
 
 class ROLLOUT(tf.keras.layers.Layer):
     def __init__(self, lstm, update_rate):
+        """
+        
+        :param lstm: the same with generator.
+        :param update_rate: 
+        """
         super(ROLLOUT, self).__init__()
         self.lstm = lstm
         self.update_rate = update_rate
 
-        self.num_emb = self.lstm.num_emb
+        self.vocab_size = self.lstm.vocab_size
         self.batch_size = self.lstm.batch_size
         self.emb_dim = self.lstm.emb_dim
         self.hidden_dim = self.lstm.hidden_dim
@@ -26,10 +31,10 @@ class ROLLOUT(tf.keras.layers.Layer):
         )
 
         ta_emb_x = tf.TensorArray(size=self.sequence_length, dtype=tf.float32)
-        ta_emb_x = ta_emb_x.unstack(self.processed_x)  # seq_len * [batch, emb_dim]
+        ta_emb_x = ta_emb_x.unstack(self.processed_x)             # seq_len * [batch, emb_dim]
 
         ta_x = tf.TensorArray(dtype=tf.int32, size=self.sequence_length)
-        ta_x = ta_x.unstack(tf.transpose(input_x, perm=[1, 0]))  # seq_len * [batch]
+        ta_x = ta_x.unstack(tf.transpose(input_x, perm=[1, 0]))   # seq_len * [batch]
 
         #####################################################################################################
         self.h0 = tf.zeros([self.batch_size, self.hidden_dim])
@@ -45,23 +50,30 @@ class ROLLOUT(tf.keras.layers.Layer):
             gen_x = gen_x.write(i, ta_x.read(i))
             return i + 1, x_tp1, h_t, given_num, gen_x
 
-        # When current index i >= given_num, start roll-out, use the output as time step t as the input at time step t+1
+        # When current index i >= given_num, start roll-out, 
+        # use the output as time step t as the input at time step t+1
         def _g_recurrence_2(i, x_t, h_tm1, given_num, gen_x):
             h_t = self.g_recurrent_unit(x_t, h_tm1)  # hidden_memory_tuple
-            o_t = self.g_output_unit(h_t)  # batch x vocab , logits not prob
+            o_t = self.g_output_unit(h_t)  # [batch, vocab] , logits not prob
             log_prob = tf.math.log(tf.nn.softmax(o_t))
-            token_search = tfp.distributions.Multinomial(total_count=1, logits=log_prob)
-            next_token = tf.cast(tf.argmax(token_search.probs, axis=-1), tf.int32)  # [batch]
-            x_tp1 = tf.nn.embedding_lookup(self.g_embeddings, next_token)  # batch x emb_dim
+            # token_search = tfp.distributions.Multinomial(total_count=1, logits=log_prob)
+            # next_token = tf.cast(tf.argmax(token_search.probs, axis=-1), tf.int32)  # [batch]
+            next_token = tf.cast(tf.reshape(tf.multinomial(logits=log_prob, num_samples=1),
+                                            [self.batch_size]), tf.int32)
+            
+            x_tp1 = tf.nn.embedding_lookup(self.g_embeddings, next_token)  # [batch, emb_dim]
             gen_x = gen_x.write(i, next_token)  # indices, batch_size
             return i + 1, x_tp1, h_t, given_num, gen_x
 
+        # i < given number, supervised generate.
         i, x_t, h_tm1, given_num, self.gen_x = tf.while_loop(
             cond=lambda i, _1, _2, given_num, _4: i < given_num,
             body=_g_recurrence_1,
             loop_vars=(tf.constant(0, dtype=tf.int32),
-                       tf.nn.embedding_lookup(self.g_embeddings, self.start_token), self.h0, given_num, gen_x))
+                       tf.nn.embedding_lookup(self.g_embeddings, self.start_token),
+                       self.h0, given_num, gen_x))
 
+        # i > given_number, unsupervised generate.
         _, _, _, _, self.gen_x = tf.while_loop(
             cond=lambda i, _1, _2, _3, _4: i < self.sequence_length,
             body=_g_recurrence_2,
@@ -77,7 +89,7 @@ class ROLLOUT(tf.keras.layers.Layer):
             # given_num between 1 to sequence_length - 1 for a part completed sentence
             for given_num in range(1, self.sequence_length ):
                 samples = self.generate(input_x, given_num)
-                ypred_for_auc, _ = discriminator.get_logits(samples)   # [batch, 2]
+                ypred_for_auc = discriminator._get_logits(samples)   # [batch, 2]
                 ypred = np.array([item[1] for item in ypred_for_auc])   # 样本为真的概率
                 if i == 0:
                     rewards.append(ypred)
@@ -85,7 +97,7 @@ class ROLLOUT(tf.keras.layers.Layer):
                     rewards[given_num - 1] += ypred    # list, length = seq_len-1
 
             # the last token reward
-            ypred_for_auc, _ = discriminator._get_logits(input_x)
+            ypred_for_auc = discriminator._get_logits(input_x)
             ypred = np.array([item[1] for item in ypred_for_auc])
             if i == 0:
                 rewards.append(ypred)
@@ -93,7 +105,7 @@ class ROLLOUT(tf.keras.layers.Layer):
                 # completed sentence reward
                 rewards[self.sequence_length - 1] += ypred
 
-        rewards = np.transpose(np.array(rewards)) / (1.0 * rollout_num)  # batch_size x seq_length
+        rewards = np.transpose(np.array(rewards)) / (1.0 * rollout_num)  # [batch_size, seq_length]
         return rewards
 
     def update_params(self):

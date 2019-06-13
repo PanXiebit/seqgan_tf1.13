@@ -91,7 +91,7 @@ class TARGET_LSTM(tf.keras.Model):
         self.g_recurrent_unit = Create_recurrent_unit(self.params)  # maps h_{t-1} to h_t for generator, one step of LSTM
         self.g_output_unit = Create_output_unit(self.params)        # maps h_t to o_t (output token logits), logits
 
-    def unsuper_generate(self):
+    def _unsuper_generate(self):
         self.h0 = tf.zeros([self.batch_size, self.hidden_dim])
         self.h0 = tf.stack([self.h0, self.h0])
 
@@ -133,7 +133,7 @@ class TARGET_LSTM(tf.keras.Model):
         self.gen_x = tf.transpose(self.gen_x, perm=[1, 0])  # [batch_size, seq_length]
         return self.gen_x
 
-    def super_generate(self, input_x):
+    def _super_generate(self, input_x):
         # supervised pretraining for generator
         # processed for batch
         with tf.device("/cpu:0"):
@@ -188,5 +188,5 @@ if __name__ == "__main__":
                               params=tmp_params)
     # tmp_x = tf.constant([[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5],[1,2,3,4,5]], dtype=tf.int32)
     # tmp_target_lstm(tmp_x)
-    tmp_example = tmp_target_lstm.generate()
+    tmp_example = tmp_target_lstm._unsuper_generate()
     print(tmp_example)
