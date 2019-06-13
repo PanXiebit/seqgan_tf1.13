@@ -44,28 +44,29 @@ class Discriminator(tf.keras.layers.Layer):
         self.grad_clip = grad_clip
 
         # embedding layer
-        self.embedding = tf.random_uniform_initializer(maxval=0.8, minval=-0.8)(
-            shape=(vocab_size, embed_size), dtype=tf.float32)
+        with tf.variable_scope("discriminator"):
+            self.embedding = tf.random_uniform_initializer(maxval=0.8, minval=-0.8)(
+                shape=(vocab_size, embed_size), dtype=tf.float32)
 
-        # convolution layer
-        self.Convs = []
-        self.Pools = []
-        for filter_size, num_filter in zip(self.filter_sizes, self.num_filters):
-            conv = tf.keras.layers.Conv2D(filters=num_filter, kernel_size=[filter_size, embed_size],
-                                          strides=(1,1), padding="valid", use_bias=True)
-            self.Convs.append(conv)
-            pool = tf.keras.layers.MaxPool2D(pool_size=(seq_len - filter_size + 1, 1),
-                                             strides=(1,1),
-                                             padding="valid")
-            self.Pools.append(pool)
+            # convolution layer
+            self.Convs = []
+            self.Pools = []
+            for filter_size, num_filter in zip(self.filter_sizes, self.num_filters):
+                conv = tf.keras.layers.Conv2D(filters=num_filter, kernel_size=[filter_size, embed_size],
+                                              strides=(1,1), padding="valid", use_bias=True)
+                self.Convs.append(conv)
+                pool = tf.keras.layers.MaxPool2D(pool_size=(seq_len - filter_size + 1, 1),
+                                                 strides=(1,1),
+                                                 padding="valid")
+                self.Pools.append(pool)
 
-        # highway and dropout
-        self.num_filters_total = sum(self.num_filters)
-        self.Highway = Highway(self.num_filters_total, num_layers=1)
-        self.Dropout = tf.keras.layers.Dropout(rate=dropout_keep_prob)
+            # highway and dropout
+            self.num_filters_total = sum(self.num_filters)
+            self.Highway = Highway(self.num_filters_total, num_layers=1)
+            self.Dropout = tf.keras.layers.Dropout(rate=dropout_keep_prob)
 
-        # prediction and score
-        self.pred_linear = tf.keras.layers.Dense(num_classes, use_bias=True)
+            # prediction and score
+            self.pred_linear = tf.keras.layers.Dense(num_classes, use_bias=True)
 
         # loss
         self.loss_obj = tf.keras.losses.CategoricalCrossentropy(from_logits=False, reduction="none")
@@ -74,7 +75,7 @@ class Discriminator(tf.keras.layers.Layer):
         self.l2_reg_lambda = l2_reg_lambda
         self.optimizer = tf.train.AdamOptimizer(self.learning_rate)
 
-    def _get_logits(self, input_x):
+    def get_logits(self, input_x):
         embed_chars = tf.nn.embedding_lookup(self.embedding, input_x)  # [batch, x_seq_len, embed_size]
         embed_chars_expanded = tf.expand_dims(embed_chars, axis=-1)    # [batch, x_seq_len, embed_size, 1]
 
@@ -104,7 +105,7 @@ class Discriminator(tf.keras.layers.Layer):
         return self.ypred_for_auc, self.predictions
 
     def comput_loss(self, input_x, input_y):
-        ypred_for_auc, _ = self._get_logits(input_x)
+        ypred_for_auc, _ = self.get_logits(input_x)
         losses = tf.reduce_mean(self.loss_obj(y_pred=ypred_for_auc, y_true=input_y))  # [batch] -> 1
         tf.identity(losses, name="cross_entropy")
         for weights in self.pred_linear.trainable_weights:
@@ -115,11 +116,10 @@ class Discriminator(tf.keras.layers.Layer):
 
     def train_op(self, input_x, input_y):
         with tf.GradientTape() as tape:
-            d_loss, _ = self.comput_loss(input_x, input_y)
-            self.d_params = [param for param in tf.trainable_variables() if "discriminator" in param.name]
+            d_loss = self.comput_loss(input_x, input_y)
             self.pretrain_grad, _ = tf.clip_by_global_norm(
-                tape.gradient(d_loss, self.d_params), self.grad_clip)
-            self.optimizer.apply_gradients(zip(self.pretrain_grad, self.g_params))
+                tape.gradient(d_loss, d_loss.trainable_variables), self.grad_clip)
+            self.optimizer.apply_gradients(zip(self.pretrain_grad, self.d_params))
         return d_loss
 
 if __name__ == "__main__":
@@ -129,21 +129,11 @@ if __name__ == "__main__":
                                       num_filters=[128, 128, 128], num_classes=2)
     tmp_input_x = tf.constant(value=[[1,2,3,4,5],[2,4,6,8,0]], dtype=tf.int32)
     tmp_input_y = tf.constant(value=[[0,1], [0,1]], dtype=tf.int32)
-    ypred_for_auc, _ = tmp_discriminator._get_logits(tmp_input_x)
+    ypred_for_auc, _ = tmp_discriminator.get_logits(tmp_input_x)
     print(ypred_for_auc.shape, ypred_for_auc)
     tmp_loss = tmp_discriminator.comput_loss(tmp_input_x, tmp_input_y)
     print(tmp_loss)
+    tmp_discriminator.train_op(tmp_input_x, tmp_input_y)
 
-    # cce = tf.keras.losses.CategoricalCrossentropy()
-    # loss = cce(
-    #     [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]],
-    #     [[.9, .05, .05], [.5, .89, .6], [.05, .01, .94]])
-    # print('Loss: ', loss.numpy())  # Loss: 0.3239
-    #
-    # cce = tf.keras.losses.SparseCategoricalCrossentropy()
-    # loss = cce(
-    # y_true=5,
-    # y_pred=[[.9, .05, .05], [.5, .89, .6], [.05, .01, .94]])
-    # print('Loss: ', loss.numpy())  # Loss: 0.3239
 
 

@@ -78,7 +78,7 @@ def main():
         # Generate Samples
         generated_samples = []
         for _ in range(int(generated_num / batch_size)):                # 生成的样本数量是 batch 的整数倍
-            generated_samples.extend(gen_model.generate())              # generare_num * [20]
+            generated_samples.extend(gen_model.unsuper_generate())              # generare_num * [20]
 
         with open(output_file, 'w') as fout:
             for poem in generated_samples:
@@ -110,7 +110,7 @@ def main():
         data_loader.reset_pointer()
         for it in range(data_loader.num_batch):
             batch = data_loader.next_batch()
-            g_loss = target_lstm.pretrain(batch)
+            g_loss = target_lstm.super_generate(batch)
             nll.append(g_loss)
         return np.mean(nll)
     for epoch in range(PRE_EPOCH_NUM):
@@ -145,7 +145,7 @@ def main():
     for total_epoch in range(TOTAL_BATCH):
         # train the generator for one step
         for it in range(1):
-            samples = generator.generate()        # roll-policy部分的生成依旧用的是 pretrained generator.
+            samples = generator.unsuper_generate()        # roll-policy部分的生成依旧用的是 pretrained generator. 不过是无监督的
             rewards = rollout.get_reward(samples, 16, discriminator)  # 基于 monte carlo 采样16，计算并累计 reward.
 
     # # training and checkpointing

@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import tensorflow_probability as tfp
+# import tensorflow_probability as tfp
 
 class ROLLOUT(tf.keras.layers.Layer):
     def __init__(self, lstm, update_rate):
@@ -77,7 +77,7 @@ class ROLLOUT(tf.keras.layers.Layer):
             # given_num between 1 to sequence_length - 1 for a part completed sentence
             for given_num in range(1, self.sequence_length ):
                 samples = self.generate(input_x, given_num)
-                ypred_for_auc, _ = discriminator._get_logits(samples)   # [batch, 2]
+                ypred_for_auc, _ = discriminator.get_logits(samples)   # [batch, 2]
                 ypred = np.array([item[1] for item in ypred_for_auc])   # 样本为真的概率
                 if i == 0:
                     rewards.append(ypred)
