@@ -51,7 +51,7 @@ def main():
     #########################################################################################
     #  Generator, oracle(target-LSTM), discrimonator model.
     #########################################################################################
-    print("loading generator, discriminator, oracle model.")
+    tf.logging.info("loading generator, discriminator, oracle model.")
     generator = Generator(vocab_size, BATCH_SIZE, EMB_DIM, HIDDEN_DIM, SEQ_LENGTH, START_TOKEN)
     target_params = pickle.load(open('./save/target_params_py3.pkl', "rb"))
     target_lstm = TARGET_LSTM(vocab_size, BATCH_SIZE,EMB_DIM, HIDDEN_DIM, SEQ_LENGTH,
@@ -91,7 +91,6 @@ def main():
         return d_loss
 
 
-
     #########################################################################################
     #  1. using oracle model(target-lstm) generator positive example
     #  2. using the positive example pre-train generator model.
@@ -104,7 +103,7 @@ def main():
     dis_data_loader = Dis_dataloader(BATCH_SIZE)
 
     # 1. use the oracle model to provide the positive examples, which are sampled from the oracle data distribution
-    print("-----------1. generate positive example using oracle model.--------")
+    tf.logging.info("-----------1. generate positive example using oracle model.--------")
     def generate_samples(gen_model, batch_size, generated_num, output_file):
         # Generate Samples
         generated_samples = []
@@ -120,7 +119,7 @@ def main():
     gen_data_load.create_batches(positive_file)
 
 
-    print("---------2. pre-training generator...\n, -------------"
+    tf.logging.info("---------2. pre-training generator...\n, -------------"
           "---------3. and generate evaluation example...--------")
     def target_loss(target_lstm, data_loader):
         # target_loss means the oracle negative log-likelihood tested with the oracle model "target_lstm"
@@ -147,10 +146,10 @@ def main():
             generate_samples(generator, BATCH_SIZE, generated_num, eval_file)  # 用5个epoch训练好的生成器，生成得到验证集
             likelihood_data_loader.create_batches(eval_file)                   # 创建验证集
             test_loss = target_loss(target_lstm, likelihood_data_loader)       # 计算验证集的 loss
-            print('pre-train epoch ', epoch, 'test_loss ', test_loss)
-            print('epoch:\t' + str(epoch) + '\tnll:\t' + str(test_loss))
+            tf.logging.info('pre-train epoch ', epoch, 'test_loss ', test_loss)
+            tf.logging.info('epoch:\t' + str(epoch) + '\tnll:\t' + str(test_loss))
 
-    print('-------- 4. Start pre-training discriminator...--------')
+    tf.logging.info('-------- 4. Start pre-training discriminator...--------')
     # Train 3 epoch on the generated data and do this for 50 times
     for i in range(50):
         generate_samples(generator, BATCH_SIZE, generated_num, negative_file)
@@ -161,15 +160,15 @@ def main():
             for it in range(dis_data_loader.num_batch):
                 x_batch, y_batch = dis_data_loader.next_batch()
                 d_loss = dis_train_step(x_batch, y_batch)
-            print("epoch\t:{} loss\t:{}".format(i, d_loss))
+            tf.logging.info("epoch\t:{} loss\t:{}".format(i, d_loss))
 
-    print("-------- 5. define roll-out policy ---------------")
+    tf.logging.info("-------- 5. define roll-out policy ---------------")
     rollout = ROLLOUT(generator, update_rate=0.8)
 
     #########################################################################################
     #  5. start adversarial training.
     #########################################################################################
-    print("---------- 6. start Adversarial Training...")
+    tf.logging.info("---------- 6. start Adversarial Training...")
     for total_batch in range(TOTAL_BATCH):
         # train the generator for one step
         for it in range(1):
@@ -182,7 +181,7 @@ def main():
             likelihood_data_loader.create_batches(eval_file)
             test_loss = target_loss(target_lstm, likelihood_data_loader)
             buffer = 'epoch:\t' + str(total_batch) + '\tnll:\t' + str(test_loss) + '\n'
-            print('total_batch: ', total_batch, 'test_loss: ', test_loss)
+            tf.logging.info('total_batch: ', total_batch, 'test_loss: ', test_loss)
 
         # Update roll-out parameters
         rollout.update_params()

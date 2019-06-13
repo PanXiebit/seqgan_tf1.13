@@ -1,0 +1,758 @@
+2019-06-13 23:02:47.308376: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-06-13 23:02:47.385415: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-06-13 23:02:47.386036: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x55ec23e675a0 executing computations on platform CUDA. Devices:
+2019-06-13 23:02:47.386051: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): GeForce GTX 1080 Ti, Compute Capability 6.1
+2019-06-13 23:02:47.407096: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 3696000000 Hz
+2019-06-13 23:02:47.407788: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x55ec2452b5c0 executing computations on platform Host. Devices:
+2019-06-13 23:02:47.407801: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): <undefined>, <undefined>
+2019-06-13 23:02:47.407878: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1433] Found device 0 with properties: 
+name: GeForce GTX 1080 Ti major: 6 minor: 1 memoryClockRate(GHz): 1.6325
+pciBusID: 0000:01:00.0
+totalMemory: 10.92GiB freeMemory: 10.66GiB
+2019-06-13 23:02:47.407888: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1512] Adding visible gpu devices: 0
+2019-06-13 23:02:47.408493: I tensorflow/core/common_runtime/gpu/gpu_device.cc:984] Device interconnect StreamExecutor with strength 1 edge matrix:
+2019-06-13 23:02:47.408501: I tensorflow/core/common_runtime/gpu/gpu_device.cc:990]      0 
+2019-06-13 23:02:47.408505: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1003] 0:   N 
+2019-06-13 23:02:47.408559: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1115] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 10366 MB memory) -> physical GPU (device: 0, name: GeForce GTX 1080 Ti, pci bus id: 0000:01:00.0, compute capability: 6.1)
+WARNING:tensorflow:From /home/panxie/.conda/envs/tf-2.0/lib/python3.6/site-packages/tensorflow/python/ops/embedding_ops.py:132: colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+2019-06-13 23:02:47.848005: I tensorflow/stream_executor/dso_loader.cc:152] successfully opened CUDA library libcublas.so.10.0 locally
+WARNING:tensorflow:From /home/panxie/Document/GANS/seqgan_tf2.0/target_lstm.py:113: multinomial (from tensorflow.python.ops.random_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.random.categorical instead.
+WARNING:tensorflow:From /home/panxie/Document/GANS/seqgan_tf2.0/generator.py:112: to_int32 (from tensorflow.python.ops.math_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.cast instead.
+WARNING:tensorflow:From /home/panxie/.conda/envs/tf-2.0/lib/python3.6/site-packages/tensorflow/python/ops/losses/losses_impl.py:209: to_float (from tensorflow.python.ops.math_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.cast instead.
+loading generator, discriminator, oracle model.
+-----------1. generate positive example using oracle model.--------
+---------2. pre-training generator...
+, ----------------------3. and generate evaluation example...--------
+pre-train epoch  0 test_loss  9870.128
+epoch:	0	nll:	9870.128
+pre-train epoch  5 test_loss  12422.167
+epoch:	5	nll:	12422.167
+pre-train epoch  10 test_loss  12422.103
+epoch:	10	nll:	12422.103
+pre-train epoch  15 test_loss  12293.442
+epoch:	15	nll:	12293.442
+pre-train epoch  20 test_loss  12385.983
+epoch:	20	nll:	12385.983
+pre-train epoch  25 test_loss  14304.942
+epoch:	25	nll:	14304.942
+pre-train epoch  30 test_loss  11121.945
+epoch:	30	nll:	11121.945
+pre-train epoch  35 test_loss  13157.174
+epoch:	35	nll:	13157.174
+pre-train epoch  40 test_loss  14198.228
+epoch:	40	nll:	14198.228
+pre-train epoch  45 test_loss  15367.007
+epoch:	45	nll:	15367.007
+pre-train epoch  50 test_loss  15547.728
+epoch:	50	nll:	15547.728
+pre-train epoch  55 test_loss  7254.548
+epoch:	55	nll:	7254.548
+pre-train epoch  60 test_loss  7341.614
+epoch:	60	nll:	7341.614
+pre-train epoch  65 test_loss  6908.706
+epoch:	65	nll:	6908.706
+pre-train epoch  70 test_loss  6960.4463
+epoch:	70	nll:	6960.4463
+pre-train epoch  75 test_loss  6955.539
+epoch:	75	nll:	6955.539
+pre-train epoch  80 test_loss  6902.5264
+epoch:	80	nll:	6902.5264
+pre-train epoch  85 test_loss  7047.2275
+epoch:	85	nll:	7047.2275
+pre-train epoch  90 test_loss  6954.3203
+epoch:	90	nll:	6954.3203
+pre-train epoch  95 test_loss  7061.4473
+epoch:	95	nll:	7061.4473
+pre-train epoch  100 test_loss  6957.2427
+epoch:	100	nll:	6957.2427
+pre-train epoch  105 test_loss  8076.916
+epoch:	105	nll:	8076.916
+pre-train epoch  110 test_loss  7388.133
+epoch:	110	nll:	7388.133
+pre-train epoch  115 test_loss  7499.846
+epoch:	115	nll:	7499.846
+pre-train epoch  120 test_loss  6998.1865
+epoch:	120	nll:	6998.1865
+pre-train epoch  125 test_loss  8172.5547
+epoch:	125	nll:	8172.5547
+pre-train epoch  130 test_loss  7546.566
+epoch:	130	nll:	7546.566
+pre-train epoch  135 test_loss  7375.669
+epoch:	135	nll:	7375.669
+pre-train epoch  140 test_loss  7732.758
+epoch:	140	nll:	7732.758
+pre-train epoch  145 test_loss  7220.9263
+epoch:	145	nll:	7220.9263
+pre-train epoch  150 test_loss  6401.3804
+epoch:	150	nll:	6401.3804
+pre-train epoch  155 test_loss  5501.0547
+epoch:	155	nll:	5501.0547
+pre-train epoch  160 test_loss  9595.904
+epoch:	160	nll:	9595.904
+pre-train epoch  165 test_loss  8248.011
+epoch:	165	nll:	8248.011
+pre-train epoch  170 test_loss  7664.189
+epoch:	170	nll:	7664.189
+pre-train epoch  175 test_loss  9278.218
+epoch:	175	nll:	9278.218
+pre-train epoch  180 test_loss  7730.7373
+epoch:	180	nll:	7730.7373
+pre-train epoch  185 test_loss  8785.395
+epoch:	185	nll:	8785.395
+pre-train epoch  190 test_loss  7175.7275
+epoch:	190	nll:	7175.7275
+pre-train epoch  195 test_loss  7035.0225
+epoch:	195	nll:	7035.0225
+pre-train epoch  200 test_loss  7532.846
+epoch:	200	nll:	7532.846
+pre-train epoch  205 test_loss  7906.644
+epoch:	205	nll:	7906.644
+pre-train epoch  210 test_loss  6953.3
+epoch:	210	nll:	6953.3
+pre-train epoch  215 test_loss  6979.5186
+epoch:	215	nll:	6979.5186
+pre-train epoch  220 test_loss  6953.755
+epoch:	220	nll:	6953.755
+pre-train epoch  225 test_loss  6952.4834
+epoch:	225	nll:	6952.4834
+pre-train epoch  230 test_loss  7823.995
+epoch:	230	nll:	7823.995
+pre-train epoch  235 test_loss  7802.331
+epoch:	235	nll:	7802.331
+pre-train epoch  240 test_loss  6971.245
+epoch:	240	nll:	6971.245
+pre-train epoch  245 test_loss  7388.8047
+epoch:	245	nll:	7388.8047
+pre-train epoch  250 test_loss  7920.6763
+epoch:	250	nll:	7920.6763
+pre-train epoch  255 test_loss  8536.982
+epoch:	255	nll:	8536.982
+pre-train epoch  260 test_loss  8068.114
+epoch:	260	nll:	8068.114
+pre-train epoch  265 test_loss  8283.114
+epoch:	265	nll:	8283.114
+pre-train epoch  270 test_loss  9262.392
+epoch:	270	nll:	9262.392
+pre-train epoch  275 test_loss  8145.769
+epoch:	275	nll:	8145.769
+pre-train epoch  280 test_loss  8326.742
+epoch:	280	nll:	8326.742
+pre-train epoch  285 test_loss  9220.734
+epoch:	285	nll:	9220.734
+pre-train epoch  290 test_loss  7375.1377
+epoch:	290	nll:	7375.1377
+pre-train epoch  295 test_loss  7648.4697
+epoch:	295	nll:	7648.4697
+pre-train epoch  300 test_loss  7322.385
+epoch:	300	nll:	7322.385
+pre-train epoch  305 test_loss  7436.791
+epoch:	305	nll:	7436.791
+pre-train epoch  310 test_loss  9675.688
+epoch:	310	nll:	9675.688
+pre-train epoch  315 test_loss  8595.376
+epoch:	315	nll:	8595.376
+pre-train epoch  320 test_loss  9583.702
+epoch:	320	nll:	9583.702
+pre-train epoch  325 test_loss  8289.453
+epoch:	325	nll:	8289.453
+pre-train epoch  330 test_loss  8556.591
+epoch:	330	nll:	8556.591
+pre-train epoch  335 test_loss  7741.1147
+epoch:	335	nll:	7741.1147
+pre-train epoch  340 test_loss  7852.2114
+epoch:	340	nll:	7852.2114
+pre-train epoch  345 test_loss  6853.0786
+epoch:	345	nll:	6853.0786
+pre-train epoch  350 test_loss  9017.342
+epoch:	350	nll:	9017.342
+pre-train epoch  355 test_loss  10252.578
+epoch:	355	nll:	10252.578
+pre-train epoch  360 test_loss  9515.757
+epoch:	360	nll:	9515.757
+pre-train epoch  365 test_loss  8431.161
+epoch:	365	nll:	8431.161
+pre-train epoch  370 test_loss  8384.6045
+epoch:	370	nll:	8384.6045
+pre-train epoch  375 test_loss  8100.356
+epoch:	375	nll:	8100.356
+pre-train epoch  380 test_loss  7797.7373
+epoch:	380	nll:	7797.7373
+pre-train epoch  385 test_loss  7642.991
+epoch:	385	nll:	7642.991
+pre-train epoch  390 test_loss  7559.1436
+epoch:	390	nll:	7559.1436
+pre-train epoch  395 test_loss  8180.5176
+epoch:	395	nll:	8180.5176
+pre-train epoch  400 test_loss  8151.4873
+epoch:	400	nll:	8151.4873
+pre-train epoch  405 test_loss  7829.8027
+epoch:	405	nll:	7829.8027
+pre-train epoch  410 test_loss  8074.425
+epoch:	410	nll:	8074.425
+pre-train epoch  415 test_loss  7739.3447
+epoch:	415	nll:	7739.3447
+pre-train epoch  420 test_loss  8410.935
+epoch:	420	nll:	8410.935
+pre-train epoch  425 test_loss  7641.73
+epoch:	425	nll:	7641.73
+pre-train epoch  430 test_loss  9645.558
+epoch:	430	nll:	9645.558
+pre-train epoch  435 test_loss  7605.0947
+epoch:	435	nll:	7605.0947
+pre-train epoch  440 test_loss  8428.073
+epoch:	440	nll:	8428.073
+pre-train epoch  445 test_loss  7591.441
+epoch:	445	nll:	7591.441
+pre-train epoch  450 test_loss  9507.677
+epoch:	450	nll:	9507.677
+pre-train epoch  455 test_loss  9524.993
+epoch:	455	nll:	9524.993
+pre-train epoch  460 test_loss  7062.9854
+epoch:	460	nll:	7062.9854
+pre-train epoch  465 test_loss  8296.788
+epoch:	465	nll:	8296.788
+pre-train epoch  470 test_loss  8829.211
+epoch:	470	nll:	8829.211
+pre-train epoch  475 test_loss  10282.952
+epoch:	475	nll:	10282.952
+pre-train epoch  480 test_loss  8100.1284
+epoch:	480	nll:	8100.1284
+pre-train epoch  485 test_loss  7617.1616
+epoch:	485	nll:	7617.1616
+pre-train epoch  490 test_loss  7437.164
+epoch:	490	nll:	7437.164
+pre-train epoch  495 test_loss  7515.701
+epoch:	495	nll:	7515.701
+pre-train epoch  500 test_loss  7510.8047
+epoch:	500	nll:	7510.8047
+pre-train epoch  505 test_loss  7637.819
+epoch:	505	nll:	7637.819
+pre-train epoch  510 test_loss  11434.02
+epoch:	510	nll:	11434.02
+pre-train epoch  515 test_loss  7576.9634
+epoch:	515	nll:	7576.9634
+pre-train epoch  520 test_loss  7577.559
+epoch:	520	nll:	7577.559
+pre-train epoch  525 test_loss  7641.614
+epoch:	525	nll:	7641.614
+pre-train epoch  530 test_loss  7649.3623
+epoch:	530	nll:	7649.3623
+pre-train epoch  535 test_loss  7648.346
+epoch:	535	nll:	7648.346
+pre-train epoch  540 test_loss  7626.5054
+epoch:	540	nll:	7626.5054
+pre-train epoch  545 test_loss  7727.7812
+epoch:	545	nll:	7727.7812
+pre-train epoch  550 test_loss  8188.2803
+epoch:	550	nll:	8188.2803
+pre-train epoch  555 test_loss  7663.979
+epoch:	555	nll:	7663.979
+pre-train epoch  560 test_loss  7646.81
+epoch:	560	nll:	7646.81
+pre-train epoch  565 test_loss  7616.544
+epoch:	565	nll:	7616.544
+pre-train epoch  570 test_loss  7608.0063
+epoch:	570	nll:	7608.0063
+pre-train epoch  575 test_loss  7603.121
+epoch:	575	nll:	7603.121
+pre-train epoch  580 test_loss  7620.8584
+epoch:	580	nll:	7620.8584
+pre-train epoch  585 test_loss  7593.1284
+epoch:	585	nll:	7593.1284
+pre-train epoch  590 test_loss  7376.282
+epoch:	590	nll:	7376.282
+pre-train epoch  595 test_loss  7427.894
+epoch:	595	nll:	7427.894
+pre-train epoch  600 test_loss  7449.4873
+epoch:	600	nll:	7449.4873
+pre-train epoch  605 test_loss  7657.9614
+epoch:	605	nll:	7657.9614
+pre-train epoch  610 test_loss  7639.6
+epoch:	610	nll:	7639.6
+pre-train epoch  615 test_loss  7722.1685
+epoch:	615	nll:	7722.1685
+pre-train epoch  620 test_loss  7633.7964
+epoch:	620	nll:	7633.7964
+pre-train epoch  625 test_loss  7759.6924
+epoch:	625	nll:	7759.6924
+pre-train epoch  630 test_loss  7999.1104
+epoch:	630	nll:	7999.1104
+pre-train epoch  635 test_loss  9161.783
+epoch:	635	nll:	9161.783
+pre-train epoch  640 test_loss  7460.722
+epoch:	640	nll:	7460.722
+pre-train epoch  645 test_loss  8303.855
+epoch:	645	nll:	8303.855
+pre-train epoch  650 test_loss  10221.84
+epoch:	650	nll:	10221.84
+pre-train epoch  655 test_loss  7651.886
+epoch:	655	nll:	7651.886
+pre-train epoch  660 test_loss  7856.9326
+epoch:	660	nll:	7856.9326
+pre-train epoch  665 test_loss  7401.711
+epoch:	665	nll:	7401.711
+pre-train epoch  670 test_loss  7862.349
+epoch:	670	nll:	7862.349
+pre-train epoch  675 test_loss  9027.745
+epoch:	675	nll:	9027.745
+pre-train epoch  680 test_loss  8963.616
+epoch:	680	nll:	8963.616
+pre-train epoch  685 test_loss  7425.0415
+epoch:	685	nll:	7425.0415
+pre-train epoch  690 test_loss  8599.061
+epoch:	690	nll:	8599.061
+pre-train epoch  695 test_loss  8338.087
+epoch:	695	nll:	8338.087
+pre-train epoch  700 test_loss  7744.21
+epoch:	700	nll:	7744.21
+pre-train epoch  705 test_loss  8324.058
+epoch:	705	nll:	8324.058
+pre-train epoch  710 test_loss  8544.685
+epoch:	710	nll:	8544.685
+pre-train epoch  715 test_loss  8537.032
+epoch:	715	nll:	8537.032
+pre-train epoch  720 test_loss  8170.7627
+epoch:	720	nll:	8170.7627
+pre-train epoch  725 test_loss  6724.489
+epoch:	725	nll:	6724.489
+pre-train epoch  730 test_loss  8573.62
+epoch:	730	nll:	8573.62
+pre-train epoch  735 test_loss  8466.694
+epoch:	735	nll:	8466.694
+pre-train epoch  740 test_loss  5774.673
+epoch:	740	nll:	5774.673
+pre-train epoch  745 test_loss  5149.7637
+epoch:	745	nll:	5149.7637
+pre-train epoch  750 test_loss  8224.2295
+epoch:	750	nll:	8224.2295
+pre-train epoch  755 test_loss  6125.185
+epoch:	755	nll:	6125.185
+pre-train epoch  760 test_loss  7044.375
+epoch:	760	nll:	7044.375
+pre-train epoch  765 test_loss  8226.266
+epoch:	765	nll:	8226.266
+pre-train epoch  770 test_loss  8236.68
+epoch:	770	nll:	8236.68
+pre-train epoch  775 test_loss  8159.089
+epoch:	775	nll:	8159.089
+pre-train epoch  780 test_loss  12415.891
+epoch:	780	nll:	12415.891
+pre-train epoch  785 test_loss  12420.904
+epoch:	785	nll:	12420.904
+pre-train epoch  790 test_loss  8639.738
+epoch:	790	nll:	8639.738
+pre-train epoch  795 test_loss  8450.234
+epoch:	795	nll:	8450.234
+pre-train epoch  800 test_loss  7496.867
+epoch:	800	nll:	7496.867
+pre-train epoch  805 test_loss  7243.99
+epoch:	805	nll:	7243.99
+pre-train epoch  810 test_loss  7838.1616
+epoch:	810	nll:	7838.1616
+pre-train epoch  815 test_loss  7891.0913
+epoch:	815	nll:	7891.0913
+pre-train epoch  820 test_loss  8004.738
+epoch:	820	nll:	8004.738
+pre-train epoch  825 test_loss  8053.305
+epoch:	825	nll:	8053.305
+pre-train epoch  830 test_loss  6915.4478
+epoch:	830	nll:	6915.4478
+pre-train epoch  835 test_loss  7794.298
+epoch:	835	nll:	7794.298
+pre-train epoch  840 test_loss  8247.5625
+epoch:	840	nll:	8247.5625
+pre-train epoch  845 test_loss  7677.0176
+epoch:	845	nll:	7677.0176
+pre-train epoch  850 test_loss  7552.7485
+epoch:	850	nll:	7552.7485
+pre-train epoch  855 test_loss  8734.587
+epoch:	855	nll:	8734.587
+pre-train epoch  860 test_loss  7272.992
+epoch:	860	nll:	7272.992
+pre-train epoch  865 test_loss  8302.136
+epoch:	865	nll:	8302.136
+pre-train epoch  870 test_loss  8259.852
+epoch:	870	nll:	8259.852
+pre-train epoch  875 test_loss  8348.638
+epoch:	875	nll:	8348.638
+pre-train epoch  880 test_loss  8034.171
+epoch:	880	nll:	8034.171
+pre-train epoch  885 test_loss  8250.543
+epoch:	885	nll:	8250.543
+pre-train epoch  890 test_loss  8321.619
+epoch:	890	nll:	8321.619
+pre-train epoch  895 test_loss  8425.538
+epoch:	895	nll:	8425.538
+pre-train epoch  900 test_loss  8350.662
+epoch:	900	nll:	8350.662
+pre-train epoch  905 test_loss  8290.038
+epoch:	905	nll:	8290.038
+pre-train epoch  910 test_loss  10078.558
+epoch:	910	nll:	10078.558
+pre-train epoch  915 test_loss  8697.979
+epoch:	915	nll:	8697.979
+pre-train epoch  920 test_loss  8802.158
+epoch:	920	nll:	8802.158
+pre-train epoch  925 test_loss  9956.417
+epoch:	925	nll:	9956.417
+pre-train epoch  930 test_loss  10387.463
+epoch:	930	nll:	10387.463
+pre-train epoch  935 test_loss  8235.944
+epoch:	935	nll:	8235.944
+pre-train epoch  940 test_loss  8427.371
+epoch:	940	nll:	8427.371
+pre-train epoch  945 test_loss  9476.47
+epoch:	945	nll:	9476.47
+pre-train epoch  950 test_loss  9085.667
+epoch:	950	nll:	9085.667
+pre-train epoch  955 test_loss  8967.51
+epoch:	955	nll:	8967.51
+pre-train epoch  960 test_loss  9186.658
+epoch:	960	nll:	9186.658
+pre-train epoch  965 test_loss  9395.868
+epoch:	965	nll:	9395.868
+pre-train epoch  970 test_loss  9124.625
+epoch:	970	nll:	9124.625
+pre-train epoch  975 test_loss  9082.998
+epoch:	975	nll:	9082.998
+pre-train epoch  980 test_loss  9642.255
+epoch:	980	nll:	9642.255
+pre-train epoch  985 test_loss  8907.908
+epoch:	985	nll:	8907.908
+pre-train epoch  990 test_loss  8862.213
+epoch:	990	nll:	8862.213
+pre-train epoch  995 test_loss  9093.352
+epoch:	995	nll:	9093.352
+pre-train epoch  1000 test_loss  9086.522
+epoch:	1000	nll:	9086.522
+pre-train epoch  1005 test_loss  9061.934
+epoch:	1005	nll:	9061.934
+pre-train epoch  1010 test_loss  12420.904
+epoch:	1010	nll:	12420.904
+pre-train epoch  1015 test_loss  8246.788
+epoch:	1015	nll:	8246.788
+pre-train epoch  1020 test_loss  8111.718
+epoch:	1020	nll:	8111.718
+pre-train epoch  1025 test_loss  8267.408
+epoch:	1025	nll:	8267.408
+pre-train epoch  1030 test_loss  8605.078
+epoch:	1030	nll:	8605.078
+pre-train epoch  1035 test_loss  8401.406
+epoch:	1035	nll:	8401.406
+pre-train epoch  1040 test_loss  7766.5938
+epoch:	1040	nll:	7766.5938
+pre-train epoch  1045 test_loss  7738.3
+epoch:	1045	nll:	7738.3
+pre-train epoch  1050 test_loss  10351.4
+epoch:	1050	nll:	10351.4
+pre-train epoch  1055 test_loss  7929.995
+epoch:	1055	nll:	7929.995
+pre-train epoch  1060 test_loss  8384.745
+epoch:	1060	nll:	8384.745
+pre-train epoch  1065 test_loss  8988.82
+epoch:	1065	nll:	8988.82
+pre-train epoch  1070 test_loss  9019.276
+epoch:	1070	nll:	9019.276
+pre-train epoch  1075 test_loss  10122.833
+epoch:	1075	nll:	10122.833
+pre-train epoch  1080 test_loss  11430.917
+epoch:	1080	nll:	11430.917
+pre-train epoch  1085 test_loss  8220.37
+epoch:	1085	nll:	8220.37
+pre-train epoch  1090 test_loss  9741.592
+epoch:	1090	nll:	9741.592
+pre-train epoch  1095 test_loss  7890.5576
+epoch:	1095	nll:	7890.5576
+pre-train epoch  1100 test_loss  9063.374
+epoch:	1100	nll:	9063.374
+pre-train epoch  1105 test_loss  8148.4277
+epoch:	1105	nll:	8148.4277
+pre-train epoch  1110 test_loss  8129.37
+epoch:	1110	nll:	8129.37
+pre-train epoch  1115 test_loss  10026.441
+epoch:	1115	nll:	10026.441
+pre-train epoch  1120 test_loss  11447.319
+epoch:	1120	nll:	11447.319
+pre-train epoch  1125 test_loss  9357.683
+epoch:	1125	nll:	9357.683
+pre-train epoch  1130 test_loss  12014.373
+epoch:	1130	nll:	12014.373
+pre-train epoch  1135 test_loss  12032.9375
+epoch:	1135	nll:	12032.9375
+pre-train epoch  1140 test_loss  11691.222
+epoch:	1140	nll:	11691.222
+pre-train epoch  1145 test_loss  8602.145
+epoch:	1145	nll:	8602.145
+pre-train epoch  1150 test_loss  8221.913
+epoch:	1150	nll:	8221.913
+pre-train epoch  1155 test_loss  5360.249
+epoch:	1155	nll:	5360.249
+pre-train epoch  1160 test_loss  8948.35
+epoch:	1160	nll:	8948.35
+pre-train epoch  1165 test_loss  7465.7197
+epoch:	1165	nll:	7465.7197
+pre-train epoch  1170 test_loss  7894.2686
+epoch:	1170	nll:	7894.2686
+pre-train epoch  1175 test_loss  9987.125
+epoch:	1175	nll:	9987.125
+pre-train epoch  1180 test_loss  8519.763
+epoch:	1180	nll:	8519.763
+pre-train epoch  1185 test_loss  9106.936
+epoch:	1185	nll:	9106.936
+pre-train epoch  1190 test_loss  9328.607
+epoch:	1190	nll:	9328.607
+pre-train epoch  1195 test_loss  9251.832
+epoch:	1195	nll:	9251.832
+pre-train epoch  1200 test_loss  8853.093
+epoch:	1200	nll:	8853.093
+pre-train epoch  1205 test_loss  9656.207
+epoch:	1205	nll:	9656.207
+pre-train epoch  1210 test_loss  9411.623
+epoch:	1210	nll:	9411.623
+pre-train epoch  1215 test_loss  9545.775
+epoch:	1215	nll:	9545.775
+pre-train epoch  1220 test_loss  9207.394
+epoch:	1220	nll:	9207.394
+pre-train epoch  1225 test_loss  8818.101
+epoch:	1225	nll:	8818.101
+pre-train epoch  1230 test_loss  9426.899
+epoch:	1230	nll:	9426.899
+pre-train epoch  1235 test_loss  9155.195
+epoch:	1235	nll:	9155.195
+pre-train epoch  1240 test_loss  9141.507
+epoch:	1240	nll:	9141.507
+pre-train epoch  1245 test_loss  9071.96
+epoch:	1245	nll:	9071.96
+pre-train epoch  1250 test_loss  9339.4795
+epoch:	1250	nll:	9339.4795
+pre-train epoch  1255 test_loss  8672.404
+epoch:	1255	nll:	8672.404
+pre-train epoch  1260 test_loss  8911.862
+epoch:	1260	nll:	8911.862
+pre-train epoch  1265 test_loss  9236.838
+epoch:	1265	nll:	9236.838
+pre-train epoch  1270 test_loss  7272.5913
+epoch:	1270	nll:	7272.5913
+pre-train epoch  1275 test_loss  6863.674
+epoch:	1275	nll:	6863.674
+pre-train epoch  1280 test_loss  9135.102
+epoch:	1280	nll:	9135.102
+pre-train epoch  1285 test_loss  7234.7534
+epoch:	1285	nll:	7234.7534
+pre-train epoch  1290 test_loss  7711.0176
+epoch:	1290	nll:	7711.0176
+pre-train epoch  1295 test_loss  8981.592
+epoch:	1295	nll:	8981.592
+pre-train epoch  1300 test_loss  7675.85
+epoch:	1300	nll:	7675.85
+pre-train epoch  1305 test_loss  8105.8965
+epoch:	1305	nll:	8105.8965
+pre-train epoch  1310 test_loss  10314.095
+epoch:	1310	nll:	10314.095
+pre-train epoch  1315 test_loss  9825.525
+epoch:	1315	nll:	9825.525
+pre-train epoch  1320 test_loss  7965.1514
+epoch:	1320	nll:	7965.1514
+pre-train epoch  1325 test_loss  8543.978
+epoch:	1325	nll:	8543.978
+pre-train epoch  1330 test_loss  7549.814
+epoch:	1330	nll:	7549.814
+pre-train epoch  1335 test_loss  8631.109
+epoch:	1335	nll:	8631.109
+pre-train epoch  1340 test_loss  8667.148
+epoch:	1340	nll:	8667.148
+pre-train epoch  1345 test_loss  8534.072
+epoch:	1345	nll:	8534.072
+pre-train epoch  1350 test_loss  8069.4165
+epoch:	1350	nll:	8069.4165
+pre-train epoch  1355 test_loss  8503.855
+epoch:	1355	nll:	8503.855
+pre-train epoch  1360 test_loss  8469.27
+epoch:	1360	nll:	8469.27
+pre-train epoch  1365 test_loss  8402.788
+epoch:	1365	nll:	8402.788
+pre-train epoch  1370 test_loss  8293.354
+epoch:	1370	nll:	8293.354
+pre-train epoch  1375 test_loss  8484.704
+epoch:	1375	nll:	8484.704
+pre-train epoch  1380 test_loss  8486.239
+epoch:	1380	nll:	8486.239
+pre-train epoch  1385 test_loss  8898.0
+epoch:	1385	nll:	8898.0
+pre-train epoch  1390 test_loss  9215.969
+epoch:	1390	nll:	9215.969
+pre-train epoch  1395 test_loss  10455.836
+epoch:	1395	nll:	10455.836
+pre-train epoch  1400 test_loss  9649.418
+epoch:	1400	nll:	9649.418
+pre-train epoch  1405 test_loss  8429.069
+epoch:	1405	nll:	8429.069
+pre-train epoch  1410 test_loss  8424.7295
+epoch:	1410	nll:	8424.7295
+pre-train epoch  1415 test_loss  9885.556
+epoch:	1415	nll:	9885.556
+pre-train epoch  1420 test_loss  12268.253
+epoch:	1420	nll:	12268.253
+pre-train epoch  1425 test_loss  10500.247
+epoch:	1425	nll:	10500.247
+pre-train epoch  1430 test_loss  9564.302
+epoch:	1430	nll:	9564.302
+pre-train epoch  1435 test_loss  11033.096
+epoch:	1435	nll:	11033.096
+pre-train epoch  1440 test_loss  10478.295
+epoch:	1440	nll:	10478.295
+pre-train epoch  1445 test_loss  10152.592
+epoch:	1445	nll:	10152.592
+pre-train epoch  1450 test_loss  10014.333
+epoch:	1450	nll:	10014.333
+pre-train epoch  1455 test_loss  11136.265
+epoch:	1455	nll:	11136.265
+pre-train epoch  1460 test_loss  11270.033
+epoch:	1460	nll:	11270.033
+pre-train epoch  1465 test_loss  9577.824
+epoch:	1465	nll:	9577.824
+pre-train epoch  1470 test_loss  9641.797
+epoch:	1470	nll:	9641.797
+pre-train epoch  1475 test_loss  10316.093
+epoch:	1475	nll:	10316.093
+pre-train epoch  1480 test_loss  9648.569
+epoch:	1480	nll:	9648.569
+pre-train epoch  1485 test_loss  8420.577
+epoch:	1485	nll:	8420.577
+pre-train epoch  1490 test_loss  8301.882
+epoch:	1490	nll:	8301.882
+pre-train epoch  1495 test_loss  9118.729
+epoch:	1495	nll:	9118.729
+pre-train epoch  1500 test_loss  9274.453
+epoch:	1500	nll:	9274.453
+pre-train epoch  1505 test_loss  9015.702
+epoch:	1505	nll:	9015.702
+pre-train epoch  1510 test_loss  9709.859
+epoch:	1510	nll:	9709.859
+pre-train epoch  1515 test_loss  8155.885
+epoch:	1515	nll:	8155.885
+pre-train epoch  1520 test_loss  8739.612
+epoch:	1520	nll:	8739.612
+pre-train epoch  1525 test_loss  9183.554
+epoch:	1525	nll:	9183.554
+pre-train epoch  1530 test_loss  9423.45
+epoch:	1530	nll:	9423.45
+pre-train epoch  1535 test_loss  8579.917
+epoch:	1535	nll:	8579.917
+pre-train epoch  1540 test_loss  8487.796
+epoch:	1540	nll:	8487.796
+pre-train epoch  1545 test_loss  9134.734
+epoch:	1545	nll:	9134.734
+pre-train epoch  1550 test_loss  8447.925
+epoch:	1550	nll:	8447.925
+pre-train epoch  1555 test_loss  6570.3364
+epoch:	1555	nll:	6570.3364
+pre-train epoch  1560 test_loss  9299.787
+epoch:	1560	nll:	9299.787
+pre-train epoch  1565 test_loss  8048.535
+epoch:	1565	nll:	8048.535
+pre-train epoch  1570 test_loss  8656.447
+epoch:	1570	nll:	8656.447
+pre-train epoch  1575 test_loss  9930.114
+epoch:	1575	nll:	9930.114
+pre-train epoch  1580 test_loss  9803.758
+epoch:	1580	nll:	9803.758
+pre-train epoch  1585 test_loss  8689.28
+epoch:	1585	nll:	8689.28
+pre-train epoch  1590 test_loss  8590.42
+epoch:	1590	nll:	8590.42
+pre-train epoch  1595 test_loss  9077.06
+epoch:	1595	nll:	9077.06
+pre-train epoch  1600 test_loss  8799.03
+epoch:	1600	nll:	8799.03
+pre-train epoch  1605 test_loss  8272.516
+epoch:	1605	nll:	8272.516
+pre-train epoch  1610 test_loss  9086.128
+epoch:	1610	nll:	9086.128
+pre-train epoch  1615 test_loss  9433.996
+epoch:	1615	nll:	9433.996
+pre-train epoch  1620 test_loss  9172.596
+epoch:	1620	nll:	9172.596
+pre-train epoch  1625 test_loss  8551.708
+epoch:	1625	nll:	8551.708
+pre-train epoch  1630 test_loss  9243.242
+epoch:	1630	nll:	9243.242
+pre-train epoch  1635 test_loss  6263.2744
+epoch:	1635	nll:	6263.2744
+pre-train epoch  1640 test_loss  6263.2744
+epoch:	1640	nll:	6263.2744
+pre-train epoch  1645 test_loss  6263.2744
+epoch:	1645	nll:	6263.2744
+pre-train epoch  1650 test_loss  6264.658
+epoch:	1650	nll:	6264.658
+pre-train epoch  1655 test_loss  8564.867
+epoch:	1655	nll:	8564.867
+pre-train epoch  1660 test_loss  7958.2036
+epoch:	1660	nll:	7958.2036
+pre-train epoch  1665 test_loss  8832.582
+epoch:	1665	nll:	8832.582
+pre-train epoch  1670 test_loss  9639.612
+epoch:	1670	nll:	9639.612
+pre-train epoch  1675 test_loss  9513.487
+epoch:	1675	nll:	9513.487
+pre-train epoch  1680 test_loss  9415.53
+epoch:	1680	nll:	9415.53
+pre-train epoch  1685 test_loss  9449.965
+epoch:	1685	nll:	9449.965
+pre-train epoch  1690 test_loss  9246.808
+epoch:	1690	nll:	9246.808
+pre-train epoch  1695 test_loss  9228.502
+epoch:	1695	nll:	9228.502
+pre-train epoch  1700 test_loss  9009.442
+epoch:	1700	nll:	9009.442
+pre-train epoch  1705 test_loss  8942.662
+epoch:	1705	nll:	8942.662
+pre-train epoch  1710 test_loss  8201.231
+epoch:	1710	nll:	8201.231
+pre-train epoch  1715 test_loss  8236.14
+epoch:	1715	nll:	8236.14
+pre-train epoch  1720 test_loss  8128.1416
+epoch:	1720	nll:	8128.1416
+pre-train epoch  1725 test_loss  9249.065
+epoch:	1725	nll:	9249.065
+pre-train epoch  1730 test_loss  8174.0
+epoch:	1730	nll:	8174.0
+pre-train epoch  1735 test_loss  8671.088
+epoch:	1735	nll:	8671.088
+pre-train epoch  1740 test_loss  8991.7
+epoch:	1740	nll:	8991.7
+pre-train epoch  1745 test_loss  9527.5205
+epoch:	1745	nll:	9527.5205
+pre-train epoch  1750 test_loss  8889.985
+epoch:	1750	nll:	8889.985
+pre-train epoch  1755 test_loss  10095.6875
+epoch:	1755	nll:	10095.6875
+pre-train epoch  1760 test_loss  9879.402
+epoch:	1760	nll:	9879.402
+pre-train epoch  1765 test_loss  8971.107
+epoch:	1765	nll:	8971.107
+pre-train epoch  1770 test_loss  8633.509
+epoch:	1770	nll:	8633.509
+pre-train epoch  1775 test_loss  8759.2705
+epoch:	1775	nll:	8759.2705
+pre-train epoch  1780 test_loss  9030.1
+epoch:	1780	nll:	9030.1
+pre-train epoch  1785 test_loss  8628.8125
+epoch:	1785	nll:	8628.8125
+pre-train epoch  1790 test_loss  8818.785
+epoch:	1790	nll:	8818.785
+pre-train epoch  1795 test_loss  8883.848
+epoch:	1795	nll:	8883.848
+pre-train epoch  1800 test_loss  8548.007
+epoch:	1800	nll:	8548.007
+pre-train epoch  1805 test_loss  8680.657
+epoch:	1805	nll:	8680.657
+pre-train epoch  1810 test_loss 
