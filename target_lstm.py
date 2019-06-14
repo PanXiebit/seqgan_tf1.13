@@ -159,20 +159,23 @@ class TARGET_LSTM(tf.keras.Model):
             body=_pretrain_recurrence,
             loop_vars=(tf.constant(0, dtype=tf.int32),
                        tf.nn.embedding_lookup(self.g_embeddings, self.start_token),
-                       self.h0, g_predictions))   # 分别对应 time_step, x_t, h_{t-1}, g_predictions
+                       self.h0, g_predictions))                         # 分别对应 time_step, x_t, h_{t-1}, g_predictions
 
         self.g_predictions = tf.transpose(
-            self.g_predictions.stack(), perm=[1, 0, 2])  # [batch_size, seq_length, vocab_size]
+            self.g_predictions.stack(), perm=[1, 0, 2])                 # [batch_size, seq_length, vocab_size]
 
         # pretraining loss
-        self.real_target = tf.one_hot(tf.cast(tf.reshape(input_x, [-1]), tf.int32), self.vocab_size, 1.0, 0.0)
-        self.pretrain_loss = -tf.reduce_sum(self.real_target * tf.math.log(tf.reshape(self.g_predictions, [-1, self.vocab_size])))
-        self.pretrain_loss = tf.reduce_mean(self.pretrain_loss, axis=None)
+        self.real_target = tf.one_hot(tf.cast(
+            tf.reshape(input_x, [-1]), tf.int32), self.vocab_size, 1.0, 0.0)  # [batch_size*seq_length, vocab_size]
+        self.pretrain_loss = tf.nn.softmax_cross_entropy_with_logits(
+            logits=tf.reshape(self.g_predictions, [-1, self.vocab_size]),
+            labels=self.real_target)            # [batch_size*seq_length, vocab_size]
+        self.pretrain_loss = tf.reduce_mean(self.pretrain_loss)
 
-        self.out_loss = tf.reduce_sum(
-            tf.reshape(
-                -tf.reduce_sum(self.real_target * tf.math.log(tf.reshape(self.g_predictions, [-1, self.vocab_size])), 1),
-                shape=[-1, self.sequence_length]), 1)  # batch_size
+        # self.out_loss = tf.reduce_sum(
+        #     tf.reshape(
+        #         -tf.reduce_sum(self.real_target * tf.math.log(tf.reshape(self.g_predictions, [-1, self.vocab_size])), 1),
+        #         shape=[-1, self.sequence_length]), 1)  # batch_size
         return self.pretrain_loss
 
 if __name__ == "__main__":

@@ -99,22 +99,22 @@ class Generator(tf.keras.Model):
                                           perm=[1, 0, 2])  # [batch_size, seq_length, vocab_size]
         self.g_predictions = tf.clip_by_value(
             tf.reshape(self.g_predictions, [-1, self.vocab_size]), 1e-20, 1.0)  # [batch_size*seq_length, vocab_size]
-        return self.g_predictions
+        return self.g_predictions       # [batch_size*seq_length, vocab_size]
 
     def _get_pretrain_loss(self, input_x):
         """
-
-        :param input_x:
+        :param input_x:  # [batch, seq_len]
         :return:
         """
         self.g_predictions = self._super_generate(input_x)
         real_target = tf.one_hot(
-            tf.to_int32(tf.reshape(input_x, [-1])),
+            indices=tf.to_int32(tf.reshape(input_x, [-1])),
             depth=self.vocab_size, on_value=1.0, off_value=0.0)  # [batch_size * seq_length, vocab_size]
-        self.pretrain_loss = tf.losses.softmax_cross_entropy(onehot_labels=real_target,
-                                                             logits=self.g_predictions,
-                                                             reduction="none")  # [batch * seq_length]
-        return self.pretrain_loss
+        self.pretrain_loss = tf.nn.softmax_cross_entropy_with_logits(
+            logits=self.g_predictions,
+            labels=real_target)                                  # [batch_size * seq_length]
+        self.pretrain_loss = tf.reduce_mean(self.pretrain_loss)  # scalar
+        return self.pretrain_loss  # [batch * seq_length]
 
     def _get_generate_loss(self, input_x, rewards):
         """
@@ -127,10 +127,9 @@ class Generator(tf.keras.Model):
         real_target = tf.one_hot(
             tf.to_int32(tf.reshape(input_x, [-1])),
             depth=self.vocab_size, on_value=1.0, off_value=0.0)  # [batch_size * seq_length, vocab_size]
-        self.pretrain_loss = tf.losses.softmax_cross_entropy(onehot_labels=real_target,
-                                                             logits=self.g_predictions,
-                                                             reduction="none")  # [batch * seq_length]
-        self.g_loss = tf.reduce_sum(self.pretrain_loss * tf.reshape(rewards, [-1]))  # scalar
+        self.pretrain_loss = tf.nn.softmax_cross_entropy_with_logits(labels=real_target,
+                                                                     logits=self.g_predictions)  # [batch * seq_length]
+        self.g_loss = tf.reduce_mean(self.pretrain_loss * tf.reshape(rewards, [-1]))  # scalar
         return self.g_loss
 
 

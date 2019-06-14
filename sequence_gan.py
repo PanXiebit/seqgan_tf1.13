@@ -1,7 +1,8 @@
 import numpy as np
 import tensorflow as tf
-
+from tensorflow.contrib.summary import summary
 tf.enable_eager_execution()
+tf.logging.set_verbosity(tf.logging.INFO)
 
 import random
 import pickle
@@ -18,7 +19,7 @@ EMB_DIM = 32 # embedding dimension
 HIDDEN_DIM = 32 # hidden state dimension of lstm cell
 SEQ_LENGTH = 20 # sequence length
 START_TOKEN = 0
-PRE_EPOCH_NUM = 10000 # supervise (maximum likelihood estimation) epochs
+PRE_EPOCH_NUM = 100 # supervise (maximum likelihood estimation) epochs
 SEED = 88
 BATCH_SIZE = 64
 
@@ -39,9 +40,12 @@ TOTAL_BATCH = 200
 positive_file = 'save/real_data.txt'
 negative_file = 'save/generator_sample.txt'
 eval_file = 'save/eval_file.txt'
-generated_num = 10000
+generated_num = 100
 vocab_size = 5000
 
+summary_writer = summary.create_file_writer('/tmp/summaries')
+summary_writer.set_as_default()
+global_step = tf.train.get_or_create_global_step()
 
 def main():
     random.seed(SEED)
@@ -67,7 +71,7 @@ def main():
         with tf.GradientTape() as tape:
             # https://stackoverflow.com/questions/50244706/trying-to-call-tape-gradient-on-a-non-persistent-tape-while-it-is-still-active
             # 使用 tg.GradientTape 时， loss 的计算必须在里面
-            pretrain_g_loss = tf.reduce_mean(generator._get_pretrain_loss(x_batch))
+            pretrain_g_loss = generator._get_pretrain_loss(x_batch)
             g_gradients, _ = tf.clip_by_global_norm(
                 tape.gradient(pretrain_g_loss, generator.trainable_variables), clip_norm=5.0)
             g_optimizer.apply_gradients(zip(g_gradients, generator.trainable_variables))
@@ -75,7 +79,7 @@ def main():
 
     def gen_reward_train_step(x_batch, rewards):
         with tf.GradientTape() as tape:
-            g_loss = tf.reduce_mean(generator._get_generate_loss(x_batch, rewards))
+            g_loss = generator._get_generate_loss(x_batch, rewards)
             g_gradients, _ = tf.clip_by_global_norm(
                 tape.gradient(g_loss, generator.trainable_variables), clip_norm=5.0)
             g_optimizer.apply_gradients(zip(g_gradients, generator.trainable_variables))
@@ -120,7 +124,7 @@ def main():
 
 
     tf.logging.info("---------2. pre-training generator...\n, -------------"
-          "---------3. and generate evaluation example...--------")
+                    "---------3. and generate evaluation example...--------")
     def target_loss(target_lstm, data_loader):
         # target_loss means the oracle negative log-likelihood tested with the oracle model "target_lstm"
         # For more details, please see the Section 4 in https://arxiv.org/abs/1609.05473
@@ -146,7 +150,6 @@ def main():
             generate_samples(generator, BATCH_SIZE, generated_num, eval_file)  # 用5个epoch训练好的生成器，生成得到验证集
             likelihood_data_loader.create_batches(eval_file)                   # 创建验证集
             test_loss = target_loss(target_lstm, likelihood_data_loader)       # 计算验证集的 loss
-            tf.logging.info('pre-train epoch ', epoch, 'test_loss ', test_loss)
             tf.logging.info('epoch:\t' + str(epoch) + '\tnll:\t' + str(test_loss))
 
     tf.logging.info('-------- 4. Start pre-training discriminator...--------')
@@ -174,28 +177,27 @@ def main():
         for it in range(1):
             samples = generator._unsuper_generate()        # roll-policy部分的生成依旧用的是 pretrained generator. 不过是无监督的
             rewards = rollout.get_reward(samples, 16, discriminator)  # 基于 monte carlo 采样16，计算并累计 reward.
-            gen_reward_train_step(samples, rewards)
+            gen_reward_train_step(samples, rewards)        # update generator.
 
         if total_batch % 5 == 0 or total_batch == TOTAL_BATCH - 1:
             generate_samples(generator, BATCH_SIZE, generated_num, eval_file)
             likelihood_data_loader.create_batches(eval_file)
             test_loss = target_loss(target_lstm, likelihood_data_loader)
-            buffer = 'epoch:\t' + str(total_batch) + '\tnll:\t' + str(test_loss) + '\n'
-            tf.logging.info('total_batch: ', total_batch, 'test_loss: ', test_loss)
+            tf.logging.info('epoch:\t' + str(total_batch) + '\tnll:\t' + str(test_loss) + '\n')
 
         # Update roll-out parameters
-        rollout.update_params()
+        rollout.update_params()   # update roll-out policy.
 
-    # Train the discriminator
-    for _ in range(5):
-        generate_samples(generator, BATCH_SIZE, generated_num, negative_file)
-        dis_data_loader.load_train_data(positive_file, negative_file)
+        # Train the discriminator
+        for _ in range(5):
+            generate_samples(generator, BATCH_SIZE, generated_num, negative_file)
+            dis_data_loader.load_train_data(positive_file, negative_file)
 
-        for _ in range(3):
-            dis_data_loader.reset_pointer()
-            for it in range(dis_data_loader.num_batch):
-                x_batch, y_batch = dis_data_loader.next_batch()
-                dis_train_step(x_batch, y_batch)
+            for _ in range(3):
+                dis_data_loader.reset_pointer()
+                for it in range(dis_data_loader.num_batch):
+                    x_batch, y_batch = dis_data_loader.next_batch()
+                    dis_train_step(x_batch, y_batch)   # update discriminator.
 
 if __name__ == "__main__":
     main()
