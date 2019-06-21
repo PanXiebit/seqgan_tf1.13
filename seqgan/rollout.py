@@ -45,9 +45,9 @@ class ROLLOUT(tf.keras.layers.Layer):
 
         # When current index i < given_num, use the provided tokens as the input at each time step
         def _g_recurrence_1(i, x_t, h_tm1, given_num, gen_x):
-            h_t = self.g_recurrent_unit(x_t, h_tm1)  # hidden_memory_tuple
+            h_t = self.g_recurrent_unit(x_t, h_tm1)  # hidden_memory_tuple 这个还是按照rnn变化的
             x_tp1 = ta_emb_x.read(i)
-            gen_x = gen_x.write(i, ta_x.read(i))
+            gen_x = gen_x.write(i, ta_x.read(i))   # 直接copy的已有的token
             return i + 1, x_tp1, h_t, given_num, gen_x
 
         # When current index i >= given_num, start roll-out, 
@@ -56,11 +56,12 @@ class ROLLOUT(tf.keras.layers.Layer):
             h_t = self.g_recurrent_unit(x_t, h_tm1)  # hidden_memory_tuple
             o_t = self.g_output_unit(h_t)  # [batch, vocab] , logits not prob
             log_prob = tf.math.log(tf.nn.softmax(o_t))
+            tf.logging.info("roll-out policy generated last token's log_prob:{}".format(tf.argmax(log_prob[:5], axis=-1)))
             # token_search = tfp.distributions.Multinomial(total_count=1, logits=log_prob)
             # next_token = tf.cast(tf.argmax(token_search.probs, axis=-1), tf.int32)  # [batch]
             next_token = tf.cast(tf.reshape(tf.multinomial(logits=log_prob, num_samples=1),
-                                            [self.batch_size]), tf.int32)
-            
+                                            [self.batch_size]), tf.int32)   # [batch]
+            #tf.logging.info("next token:{}".format(next_token[:5]))
             x_tp1 = tf.nn.embedding_lookup(self.g_embeddings, next_token)  # [batch, emb_dim]
             gen_x = gen_x.write(i, next_token)  # indices, batch_size
             return i + 1, x_tp1, h_t, given_num, gen_x
@@ -89,7 +90,9 @@ class ROLLOUT(tf.keras.layers.Layer):
             # given_num between 1 to sequence_length - 1 for a part completed sentence
             for given_num in range(1, self.sequence_length ):
                 samples = self.generate(input_x, given_num)
+                #tf.logging.info("roll-out generate samples:{}".format(samples[0]))
                 ypred_for_auc = discriminator._get_logits(samples)   # [batch, 2]
+                #tf.logging.info("given_num:{}, ypred_for_auc:{}".format(given_num, ypred_for_auc[0]))
                 ypred = np.array([item[1] for item in ypred_for_auc])   # 样本为真的概率
                 if i == 0:
                     rewards.append(ypred)
@@ -98,6 +101,7 @@ class ROLLOUT(tf.keras.layers.Layer):
 
             # the last token reward
             ypred_for_auc = discriminator._get_logits(input_x)
+            #tf.logging.info("given_num: 20, ypred_for_auc:{}".format(ypred_for_auc[0]))
             ypred = np.array([item[1] for item in ypred_for_auc])
             if i == 0:
                 rewards.append(ypred)

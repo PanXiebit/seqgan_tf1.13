@@ -1,5 +1,5 @@
 import tensorflow as tf
-tf.enable_eager_execution()
+# tf.enable_eager_execution()
 
 
 class test_model(tf.keras.Model):
@@ -35,10 +35,11 @@ def train_step():
         # gradients = tape.gradient(tmp_loss, tmp_model.variables)
         # print(gradients)
         print(tmp_loss)
+        print("variables:{}".format(tmp_model.linear2.trainable_variables))
         clip_grads, _ = tf.clip_by_global_norm(
-            tape.gradient(tmp_loss, tmp_model.trainable_variables), clip_norm=5)
+            tape.gradient(tmp_loss, tmp_model.linear2.trainable_variables), clip_norm=5)
         # print(clip_grads)
-        optimizer.apply_gradients(zip(clip_grads, tmp_model.trainable_variables))
+        optimizer.apply_gradients(zip(clip_grads, tmp_model.linear2.trainable_variables))
 
 if __name__ == "__main__":
     NUM_EPOCH = 10

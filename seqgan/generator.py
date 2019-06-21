@@ -21,7 +21,6 @@ class Generator(tf.keras.Model):
         self.h0 = tf.stack([self.h0, self.h0])
 
         # define variables
-        self.expected_reward = tf.Variable(tf.zeros([self.sequence_length]), dtype=tf.float32)
         self.g_embeddings = tf.Variable(self.init_matrix([self.vocab_size, self.emb_dim]))
         self.g_params.append(self.g_embeddings)
         self.g_recurrent_unit = self.create_recurrent_unit(self.g_params)  # maps h_{t-1} to h_t for generator
@@ -45,6 +44,7 @@ class Generator(tf.keras.Model):
             h_t = self.g_recurrent_unit(x_t, h_tm1)  # hidden_memory_tuple
             o_t = self.g_output_unit(h_t)  # [batch, vocab] , logits not prob
             log_prob = tf.log(tf.nn.softmax(o_t))
+            #tf.logging.info("unsupervised generated log_prob:{}".format(log_prob[0]))
             next_token = tf.cast(tf.reshape(tf.multinomial(logits=log_prob, num_samples=1),
                                             [self.batch_size]), tf.int32)
             x_tp1 = tf.nn.embedding_lookup(self.g_embeddings, next_token)  # [batch, emb_dim]
@@ -240,15 +240,31 @@ class Generator(tf.keras.Model):
 
 
 if __name__ == "__main__":
-    tf.enable_eager_execution()
+    # tf.enable_eager_execution()
     tmp_generator = Generator(vocab_size=1000, batch_size=5, emb_dim=64, hidden_dim=64,
                           sequence_length=20, start_token=0,
                           learning_rate=0.01, reward_gamma=0.95)
+    # for module in tmp_generator.trainable_variables:
+    #     print(module)
     tmp_example = tmp_generator._unsuper_generate()  # [5, 20]
     print(tmp_example.shape)
-    # pretrain generator using tmp_example
-    tmp_example2 = tmp_generator._super_generate(tmp_example)
-    print(tmp_example2.shape)
+    # # pretrain generator using tmp_example
+    # tmp_example2 = tmp_generator._super_generate(tmp_example)
+    # print(tmp_example2.shape)
     # print(tmp_generator.trainable_variables)
-    # pretrain_loss = tmp_generator.pretrain_step(tmp_example)
-    # print(pretrain_loss.shape)
+    g_optimizer = tf.train.AdamOptimizer(learning_rate=tmp_generator.learning_rate)
+    def gen_train_step(x_batch):
+        with tf.GradientTape() as tape:
+            # https://stackoverflow.com/questions/50244706/trying-to-call-tape-gradient-on-a-non-persistent-tape-
+            # while-it-is-still-active
+            # 使用 tg.GradientTape 时， loss 的计算必须在里面
+            pretrain_g_loss = tmp_generator._get_pretrain_loss(x_batch)
+            print(pretrain_g_loss)
+            print(tmp_generator.trainable_variables)
+            g_gradients, _ = tf.clip_by_global_norm(
+                tape.gradient(pretrain_g_loss, tmp_generator.trainable_variables), clip_norm=5.0)
+            g_optimizer.apply_gradients(zip(g_gradients, tmp_generator.trainable_variables))
+        return pretrain_g_loss
+
+    for i in range(10):
+        gen_train_step(tmp_example)
